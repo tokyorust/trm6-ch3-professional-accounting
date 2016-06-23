@@ -11,6 +11,7 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::fs::File;
 use std::io;
+use std::path::Path;
 
 #[derive(Debug)]
 enum Error {
@@ -64,7 +65,7 @@ struct Account {
 }
 
 impl Account {
-    fn load(path: &str) -> Result<Account> {
+    fn load<P: AsRef<Path>>(path: P) -> Result<Account> {
         let reader = try!(File::open(path));
         let account: Account = try!(serde_json::from_reader(reader));
         Ok(account)
