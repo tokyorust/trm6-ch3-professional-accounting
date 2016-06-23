@@ -7,6 +7,7 @@
 extern crate serde;
 extern crate serde_json;
 
+use std::env;
 use std::error::Error as StdError;
 use std::fmt;
 use std::fs::File;
@@ -91,7 +92,8 @@ struct Transaction {
 }
 
 fn main() {
-    let account = Account::load("account.json").unwrap();
+    let filename = env::var("ACCOUNT_FILE").unwrap_or("account.json".to_owned());
+    let account = Account::load(filename).unwrap();
     let balance = account.balance().expect("Impossible balance");
     println!("Balance of account {} is {}", account.id, balance);
 }
