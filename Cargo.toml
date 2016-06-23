@@ -1,6 +1,9 @@
 [package]
-name = "trm6_template"
+name = "trm6_ch3_professional_accounting"
 version = "0.1.0"
 
 [dependencies]
 clippy = "*"
+serde = "0.7.10"
+serde_macros = "0.7.10"
+serde_json = "0.7.1"
