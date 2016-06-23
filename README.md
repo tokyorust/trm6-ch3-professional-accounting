@@ -48,7 +48,7 @@ Your `main` should then look something like this:
 ```rust
 fn main() {
     let account = Account::load("account.json").unwrap();
-    let balance = account.balance().expect("positive balance");
+    let balance = account.balance().expect("Impossible balance");
     println!("Balance of account {} is {}", account.id, balance);
 }
 ```
