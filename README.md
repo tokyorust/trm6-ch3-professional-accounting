@@ -55,4 +55,4 @@ fn main() {
 
 ## (Optional bonus challenge 3)
 
-Make it possible to specify the account filename using an environment variable.
+Make it possible to specify the account filename using an environment variable. It may be helpful if you've completed bonus challenge 1 already.
