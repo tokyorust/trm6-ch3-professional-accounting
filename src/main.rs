@@ -17,6 +17,7 @@ use std::path::Path;
 enum Error {
     Io(io::Error),
     Json(serde_json::Error),
+    NegativeBalance(i64),
 }
 
 impl fmt::Display for Error {
@@ -24,6 +25,7 @@ impl fmt::Display for Error {
         match *self {
             Error::Io(ref err) => write!(f, "{}: {}", StdError::description(self), err),
             Error::Json(ref err) => write!(f, "{}: {}", StdError::description(self), err),
+            Error::NegativeBalance(balance) => write!(f, "Negative balance of {} credits", balance),
         }
     }
 }
@@ -33,6 +35,7 @@ impl StdError for Error {
         match *self {
             Error::Io(_) => "I/O error",
             Error::Json(_) => "JSON error",
+            Error::NegativeBalance(_) => "Negative balance",
         }
     }
 
@@ -40,6 +43,7 @@ impl StdError for Error {
         match *self {
             Error::Io(ref err) => Some(err),
             Error::Json(ref err) => Some(err),
+            Error::NegativeBalance(_) => None,
         }
     }
 }
@@ -71,8 +75,12 @@ impl Account {
         Ok(account)
     }
 
-    fn balance(&self) -> i64 {
-        self.transactions.iter().fold(0, |acc, ref tx| acc + tx.amount)
+    fn balance(&self) -> Result<i64> {
+        let balance = self.transactions.iter().fold(0, |acc, ref tx| acc + tx.amount);
+        if balance < 0 {
+            return Err(Error::NegativeBalance(balance))
+        }
+        Ok(balance)
     }
 }
 
@@ -83,11 +91,9 @@ struct Transaction {
 }
 
 fn main() {
-    let account = match Account::load("account.json") {
-        Ok(account) => account,
-        Err(err) => panic!("Aaand it's all gone: {}", err),
-    };
-    println!("Balance of account {} is {}", account.id, account.balance());
+    let account = Account::load("account.json").unwrap();
+    let balance = account.balance().expect("Impossible balance");
+    println!("Balance of account {} is {}", account.id, balance);
 }
 
 #[test]
@@ -98,5 +104,9 @@ fn should_load_account() {
 #[test]
 fn should_calculate_balance() {
     let account = Account::load("account.json").unwrap();
-    assert_eq!(account.balance(), 4536);
+    match account.balance() {
+        Ok(_) => unreachable!(),
+        Err(Error::NegativeBalance(balance)) => assert_eq!(balance, -5464),
+        Err(_) => unreachable!(),
+    }
 }
